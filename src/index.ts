@@ -67,3 +67,5 @@ app.listen ( 8000, () => {
     console.log ( 'O servidor está rodando na porta 8000' );
     
 });
+
+// Tarefa - Criar uma rota get para produtos que retorne a lista de produtos do Bando de Dados, o produto deve ter Id, Nome, Preço, URL Foto e Descrição. Deve - se criar uma tabela no Banco de Dados Aiven para armazenar os produtos e a resposta deve ser um array de produtos em formato JSON. 
