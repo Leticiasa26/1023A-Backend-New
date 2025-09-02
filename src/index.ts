@@ -2,7 +2,6 @@ import 'dotenv/config'
 import express, { Request, Response } from 'express';
 import mysql from 'mysql2/promise';
 
-console.log ( process.env.DBUSER );
 const app = express ();
 
 // ! singifica que é a negação da variável 
@@ -69,3 +68,29 @@ app.listen ( 8000, () => {
 });
 
 // Tarefa - Criar uma rota get para produtos que retorne a lista de produtos do Bando de Dados, o produto deve ter Id, Nome, Preço, URL Foto e Descrição. Deve - se criar uma tabela no Banco de Dados Aiven para armazenar os produtos e a resposta deve ser um array de produtos em formato JSON. 
+
+app.get ( '/produtos', async ( req:Request, res:Response ) => {
+
+    try {
+
+        const connection = await mysql.createConnection ( {
+
+            host: process.env.DBHOST ? process.env.DBHOST: 'error localhost',
+            user: process.env.DBUSER ? process.env.DBUSER: 'error user',
+            password: process.env.DBPASSWORD ? process.env.DBPASSWORD: '',
+            database: process.env.DBNAME ? process.env.DBNAME: "error name",
+            port: Number ( process.env.DBPORT ? process.env.DBPORT: "3306" )
+
+        });
+
+        const produtos = await connection.query ( "SELECT * FROM produtos" )
+
+        res.send ( produtos [ 0 ] );
+
+    } catch ( error ) {
+
+        console.log ( "erro ao conectar", error )
+        
+        }
+    
+});
