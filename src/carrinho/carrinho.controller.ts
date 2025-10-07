@@ -1,14 +1,6 @@
-import { Request, Response } from "express";
 import { db } from "../database/banco-mongo.js";
-
-interface ItemCarrinho {
-
-    nome: string;
-    precoUnitario: number;
-    produtoId: string;
-    quantidade: number;
-
-}
+import { ObjectId } from "bson";
+import { Request, Response } from "express";
 
 interface Carrinho {
 
@@ -19,57 +11,132 @@ interface Carrinho {
 
 }
 
-// AdicionarItem - Um carrinho para cada usuário - Um tipo de produto por carrinho.
+interface ItemCarrinho {
+
+    nome: string;
+    precoUnitario: number;
+    produtoId: string;
+    quantidade: number;
+
+}
+
+interface Produto {
+
+    descricao: string;
+    _id: ObjectId;
+    nome: string;
+    preco: number;
+    urlfoto: string;
+
+}
 
 class CarrinhoController {
 
+// Adicionar item
+
     async adicionar ( req: Request, res: Response ) {
 
-        const { usuarioId, item } = req.body
-        const carrinhoExistente = await db.collection ( 'carrinho' ) .insertOne ( { usuarioId } );
+        const { produtoId, quantidade, usuarioId } = req.body as { usuarioId: string, produtoId: string, quantidade: number };
+        console.log ( produtoId, quantidade, usuarioId )
 
-            if ( carrinhoExistente ) {
+// Buscar o produto no banco de dados
 
-                // Atualizar carrinho existente
-                // Verificar se item já está no carrinho
+        const produto = await db.collection < Produto > ( "produtos" ) .findOne ( { _id: ObjectId.createFromHexString ( produtoId ) } );
 
-            } else {
+            if ( ! produto ) {
 
-                const novoCarrinho: Carrinho = {
+            return res.status ( 404 ) .json ( { mensagem: "O produto não foi encontrado" } ) };
 
-                    usuarioId,
-                    dataAtualizacao: new Date (),
-                    itens: [ item ],
-                    total: item.precoUnitario * item.quantidade
+// Pegar o nome e o preço do produto
 
-                };
+        const nomeProduto = produto?.nome;
+        const precoProduto = produto?.preco;
 
-                const result = await db.collection ( 'carrinho' ) .insertOne ( novoCarrinho );
+// Verificar se o usuário já possui um carrinho
 
-                return res.status ( 201 ) .json ( { _id: result.insertedId } );
-                
-            }
+        const carrinho = await db.collection < Carrinho > ( "carrinhos" ) .findOne ( { usuarioId: usuarioId } );
 
-        const atualizarCarrinho = ( carrinho : Carrinho ) => {
-        const itemExistente = carrinho.itens.find ( ( i ) => i.produtoId === item.produtoId );
+        if ( !carrinho ) {
+
+            const novoCarrinho: Carrinho = {
+
+                usuarioId: usuarioId,
+                itens: [ {
+
+                    nome: nomeProduto,
+                    precoUnitario: precoProduto,
+                    produtoId: produtoId,
+                    quantidade:quantidade
+                   
+                } ], 
+            
+                dataAtualizacao: new Date (),
+                total: precoProduto * quantidade
+            
+            }  
+        
+        const resp = await db.collection < Carrinho > ( "carrinhos" ) .insertOne ( novoCarrinho );
+        const carrinhoRes = {
+
+            dataAtualizacao: novoCarrinho.dataAtualizacao,
+            _id: resp.insertedId,
+            itens: novoCarrinho.itens,
+            total: novoCarrinho.total,
+            usuarioId: novoCarrinho.usuarioId
+
+        };
+
+// Early return
+
+        return res.status( 201 ) .json ( carrinhoRes );
+
+        } 
+
+// Se existir, deve adicionar o item ao carrinho existente
+
+        const itemExistente = carrinho.itens.find ( item => item.produtoId === produtoId );
+
+        if ( itemExistente ) {
+
+        itemExistente.quantidade += quantidade;
+        carrinho.total += precoProduto * quantidade;
+        carrinho.dataAtualizacao = new Date ();
+
+        } else {
+
+            carrinho.itens.push ( { 
+
+                produtoId: produtoId,
+                quantidade: quantidade,
+                precoUnitario:precoProduto,
+                nome: nomeProduto
+
+            } );
+
+            carrinho.total += precoProduto * quantidade;
+            carrinho.dataAtualizacao = new Date ();
 
         }
 
-        res.status ( 201 ) .json ( { ...usuarioId, _id: carrinhoExistente.insertedId } )
+// Atualizar o carrinho no banco de dados
+
+    await db.collection < Carrinho > ( "carrinhos" ) .updateOne ( { usuarioId: usuarioId },
+
+          { $set: {
+
+                itens: carrinho.itens,
+                total: carrinho.total,
+                dataAtualizacao: carrinho.dataAtualizacao
+
+            } } 
+     )
+
+        res.status ( 200 ) .json ( carrinho );
 
     }
 
-    async listar ( req: Request, res: Response ) {
+     async removerItem ( req:Request, res:Response ) {}
 
-        const produtos = await db.collection ( 'produtos' ) .find () .toArray ();
-
-        res.status ( 200 ) .json ( produtos );
-
-    } } 
-
+}
+   
 export default new CarrinhoController ();
-
-// RemoverItem - Excluir item.
-// AtualizarQuantidade.
-// Listar.
-// Remover - Excluir carrinho.

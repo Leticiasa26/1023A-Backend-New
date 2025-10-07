@@ -12,7 +12,8 @@ rotas.get  ( "/usuarios", usuarioController.listar     );
 rotas.post ( "/produtos", produtoController.adicionar  );
 rotas.get  ( "/produtos", produtoController.listar     );
 rotas.post ( "/carrinho", carrinhoController.adicionar );
-rotas.get  ( "/carrinho", carrinhoController.listar    );
 
+//rotas.get  ( "/carrinho", carrinhoController.listar    );
+//rotas.post ( "/adicionarItem", carrinhoController.adicionarItem);
 
 export default rotas;
