@@ -1,20 +1,14 @@
 import 'dotenv/config'
 import express from 'express';
-import rotasAutenticadas from '../rotas/rotas-autenticadas.js';
-import rotasNaoAutenticadas from '../rotas/rotas-nao-autenticadas.js';
+import rotasAutenticadas from './rotas/rotas-autenticadas.js';
+import rotasNaoAutenticadas from './rotas/rotas-nao-autenticadas.js';
 import { NextFunction,Request,Response } from "express";
+import Auth from './middleware/auth.js';
 
 const app = express ();
 
-// Explicando o que é um Middleware
-
-function Middleware ( req:Request, res:Response, next:NextFunction ) {
-    
-    return res.status ( 401 ) .json ( { mensasgem: "Você não tem permissão para acessar este recurso" } )
-}
-
 app.use(rotasNaoAutenticadas)
-app.use (Middleware)
+app.use (Auth)
 app.use(rotasAutenticadas);
 app.listen ( 8000, () => {
 

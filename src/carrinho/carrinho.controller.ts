@@ -1,32 +1,32 @@
 import { db } from "../database/banco-mongo.js";
-import { ObjectId } from "bson";
 import { Request, Response } from "express";
+import { ObjectId } from "bson";
 
 interface Carrinho {
 
-    dataAtualizacao: Date;
-    itens: ItemCarrinho [];
-    total: number;
-    usuarioId: string;
+    dataAtualizacao:Date;
+    itens:ItemCarrinho [];
+    total:number;
+    usuarioId:string;
 
 }
 
 interface ItemCarrinho {
 
-    nome: string;
-    precoUnitario: number;
-    produtoId: string;
-    quantidade: number;
+    nome:string;
+    precoUnitario:number;
+    produtoId:string;
+    quantidade:number;
 
 }
 
 interface Produto {
 
-    descricao: string;
-    _id: ObjectId;
-    nome: string;
-    preco: number;
-    urlfoto: string;
+    descricao:string;
+    _id:ObjectId;
+    nome:string;
+    preco:number;
+    urlfoto:string;
 
 }
 
@@ -36,25 +36,25 @@ class CarrinhoController {
 
     async adicionar ( req:Request, res:Response ) {
 
-        const { produtoId, quantidade, usuarioId } = req.body as { usuarioId: string, produtoId: string, quantidade: number };
+        const { produtoId, quantidade, usuarioId } = req.body as { usuarioId:string, produtoId:string, quantidade:number };
         console.log ( produtoId, quantidade, usuarioId )
 
-// Buscar o produto no banco de dados
+// Buscar o produto
 
-        const produto = await db.collection < Produto > ( "produtos" ) .findOne ( { _id: ObjectId.createFromHexString ( produtoId ) } );
+        const produto = await db.collection < Produto > ( "produtos" ) .findOne ( { _id:ObjectId.createFromHexString ( produtoId ) } );
 
             if ( ! produto ) {
 
-            return res.status ( 404 ) .json ( { mensagem: "O produto não foi encontrado" } ) };
+            return res.status ( 404 ) .json ( { mensagem: "Produto não encontrado" } ) };
 
-// Pegar o nome e o preço do produto
+// Pegar nome e preço do produto
 
-        const nomeProduto = produto?.nome;
-        const precoProduto = produto?.preco;
+        const nomeProduto = produto.nome;
+        const precoProduto = produto.preco;
 
-// Verificar se o usuário já possui um carrinho
+// Verificar se usuário já possui carrinho
 
-        const carrinho = await db.collection < Carrinho > ( "carrinhos" ) .findOne ( { usuarioId: usuarioId } );
+        const carrinho = await db.collection < Carrinho > ( "carrinhos" ) .findOne ( { usuarioId:usuarioId } );
 
         if ( ! carrinho ) {
 
@@ -63,38 +63,38 @@ class CarrinhoController {
                 usuarioId: usuarioId,
                 itens: [ {
 
-                    nome: nomeProduto,
-                    precoUnitario: precoProduto,
-                    produtoId: produtoId,
+                    nome:nomeProduto,
+                    precoUnitario:precoProduto,
+                    produtoId:produtoId,
                     quantidade:quantidade
                    
                 } ], 
             
-                dataAtualizacao: new Date (),
-                total: precoProduto * quantidade
+                dataAtualizacao:new Date (),
+                total:precoProduto * quantidade
             
             }  
         
         const resp = await db.collection < Carrinho > ( "carrinhos" ) .insertOne ( novoCarrinho );
-        const carrinhoRes = {
+        const carrinhoResp = {
 
-            dataAtualizacao: novoCarrinho.dataAtualizacao,
-            _id: resp.insertedId,
-            itens: novoCarrinho.itens,
-            total: novoCarrinho.total,
-            usuarioId: novoCarrinho.usuarioId
+            dataAtualizacao:novoCarrinho.dataAtualizacao,
+            _id:resp.insertedId,
+            itens:novoCarrinho.itens,
+            total:novoCarrinho.total,
+            usuarioId:novoCarrinho.usuarioId
 
         };
 
 // Early return
 
-        return res.status ( 201 ) .json ( carrinhoRes );
+        return res.status ( 201 ) .json ( carrinhoResp );
 
         } 
 
-// Se existir, deve adicionar o item ao carrinho existente
+// Se existir, adicionar item ao carrinho
 
-        const itemExistente = carrinho.itens.find ( item => item.produtoId === produtoId );
+        const itemExistente = carrinho.itens .find ( item => item.produtoId === produtoId );
 
         if ( itemExistente ) {
 
@@ -104,14 +104,14 @@ class CarrinhoController {
 
         } else {
 
-            carrinho.itens.push ( { 
+            carrinho.itens .push ( { 
 
-                produtoId: produtoId,
-                quantidade: quantidade,
+                produtoId:produtoId,
+                quantidade:quantidade,
                 precoUnitario:precoProduto,
-                nome: nomeProduto
+                nome:nomeProduto
 
-            } );
+        } );
 
             carrinho.total += precoProduto * quantidade;
             carrinho.dataAtualizacao = new Date ();

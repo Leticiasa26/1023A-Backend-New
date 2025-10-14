@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { db } from "../database/banco-mongo.js";
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 class UsuarioController {
 
@@ -46,7 +47,15 @@ class UsuarioController {
 
         const senhaValida = await bcrypt.compare ( senha, usuario.senha )
 
-        //  criar Token, devolver o Token.
+        if ( ! senhaValida ) return res.status ( 400 ) .json ( { mensagem: "Senha invalida" } )
+
+        // Criar Token.
+
+        const token = jwt.sign ( { usuarioId:usuario._id }, process.env.JWT_SECRET!, { expiresIn: '3h' } )
+
+        // Devolver o Token.
+
+        res.status ( 200 ) .json ( { token } )
 
     } }
 
