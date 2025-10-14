@@ -94,7 +94,7 @@ class CarrinhoController {
 
 // Se existir, adicionar item ao carrinho
 
-        const itemExistente = carrinho.itens .find ( item => item.produtoId === produtoId );
+        const itemExistente = carrinho.itens.find ( item => item.produtoId === produtoId );
 
         if ( itemExistente ) {
 
@@ -118,17 +118,18 @@ class CarrinhoController {
 
         }
 
-// Atualizar o carrinho no banco de dados
+// Atualizar o carrinho
 
-    await db.collection < Carrinho > ( "carrinhos" ) .updateOne ( { usuarioId: usuarioId },
+    await db.collection < Carrinho > ( "carrinhos" ) .updateOne ( { usuarioId:usuarioId },
 
           { $set: {
 
-                itens: carrinho.itens,
-                total: carrinho.total,
-                dataAtualizacao: carrinho.dataAtualizacao
+                itens:carrinho.itens,
+                total:carrinho.total,
+                dataAtualizacao:carrinho.dataAtualizacao
 
-            } } 
+            } }
+
      )
 
         res.status ( 200 ) .json ( carrinho );
@@ -139,12 +140,13 @@ class CarrinhoController {
 
     async removerItem ( req:Request, res:Response ) {
 
-    const { produtoId, usuarioId } = req.body as { produtoId: string, usuarioId: string }
-    const carrinho = await db.collection < Carrinho > ( "carrinhos" ) .findOne ( { usuarioId: usuarioId } )
+    const { produtoId, usuarioId } = req.body as { produtoId:string, usuarioId:string }
+    const carrinho = await db.collection < Carrinho > ( "carrinhos" ) .findOne ( { usuarioId:usuarioId } )
 
     if ( ! carrinho ) {
 
-        return res.status ( 401 ) .json ( { mensagem: "O seu carrinho não existe" } );
+        return res.status ( 401 ) .json ( { mensagem: "Carrinho não existe" } );
+
     }
 
     const itemExistente = carrinho.itens.find ( item => item.produtoId === produtoId );
@@ -155,22 +157,22 @@ class CarrinhoController {
 
     }
 
-    const TotalAntigo = carrinho.total;
-    const TotalNovo = TotalAntigo - itemExistente?.precoUnitario * itemExistente?.quantidade;
+    const totalAntigo = carrinho.total;
+    const totalNovo = totalAntigo - itemExistente.precoUnitario * itemExistente.quantidade;
     const carrinhoUpdate = await db.collection < Carrinho > ( "carrinhos" ) .updateOne ( 
 
-        { usuarioId: usuarioId },
+        { usuarioId:usuarioId },
 
         { $set: {
 
-                dataAtualizacao: new Date (),
-                total: TotalNovo
+                dataAtualizacao:new Date (),
+                total:totalNovo
 
-            },
+                },
 
-            $pull: {
+           $pull: {
 
-                itens: { produtoId: produtoId }
+                itens: { produtoId:produtoId }
 
             } }
 
@@ -182,12 +184,13 @@ class CarrinhoController {
     
     async listarItens ( req:Request, res:Response ) {
 
-        const { usuarioId } = req.body as { usuarioId: string }
-        const carrinho = await db.collection < Carrinho > ( "carrinhos" ) .findOne ( { usuarioId: usuarioId } )
+        const { usuarioId } = req.body as { usuarioId:string }
+        const carrinho = await db.collection < Carrinho > ( "carrinhos" ) .findOne ( { usuarioId:usuarioId } )
 
         if ( ! carrinho ) {
 
-            return res.status ( 401 ) .json ( { mensagem: "O seu carrinho não existe" } );
+            return res.status ( 401 ) .json ( { mensagem: "Carrinho não existe" } );
+
         }
 
         return res.status ( 200 ) .json ( carrinho.itens );
@@ -199,15 +202,15 @@ class CarrinhoController {
     async deletarCarrinho ( req:Request, res:Response ) {
 
         const { usuarioId } = req.body as { usuarioId:string }
-        const carrinho = await db.collection < Carrinho > ( "carrinhos" ) .deleteOne ( { usuarioId: usuarioId } )
+        const carrinho = await db.collection < Carrinho > ( "carrinhos" ) .deleteOne ( { usuarioId:usuarioId } )
 
         if ( ! carrinho.acknowledged ) {
 
-            return res.status ( 401 ) .json ( { mensagem: "carrinho falhou em ser apagado" } );
+            return res.status ( 401 ) .json ( { mensagem: "Falha ao apagar carrinho" } );
 
         }
 
-        return res.status ( 200 ) .json ( { mensagem: "O seu carrinho apagado" } );
+        return res.status ( 200 ) .json ( { mensagem: "Carrinho apagado" } );
 
     } 
 
@@ -215,42 +218,43 @@ class CarrinhoController {
 
     async atualizarQuantidade ( req:Request, res:Response ) {
         
-        const { produtoId, usuarioId, quantidade } = req.body as { produtoId: string, usuarioId: string, quantidade: number };
+        const { produtoId, usuarioId, quantidade } = req.body as { produtoId:string, usuarioId:string, quantidade:number };
         const carrinhoAnt = await db.collection < Carrinho > ( "carrinhos" ) .findOne ( { usuarioId:usuarioId } );
 
         if ( ! carrinhoAnt ) {
 
-            return res.status ( 401 ) .send ( { mensagem: "Seu carrinho não foi encontrado" } )
+            return res.status ( 401 ) .send ( { mensagem: "Carrinho não encontrado" } )
 
         }
         
-        const itemCarrinho = carrinhoAnt?.itens .find ( item => item.produtoId === produtoId );
+        const itemCarrinho = carrinhoAnt.itens.find ( item => item.produtoId === produtoId );
 
-        if ( ! itemCarrinho ) return res.status ( 201 ) .send ( { mensagem: "Item dentro do carrinho não encontrado" } )
+        if ( ! itemCarrinho ) return res.status ( 201 ) .send ( { mensagem: "Item do carrinho não encontrado" } )
         
         const quantidadeAntiga = itemCarrinho.quantidade
 
         if ( itemCarrinho.quantidade + quantidade < 0 ) {
 
             return res.status ( 401 ) .send ( { mensagem: "Não pode ter quantidade negativa" } )
+
         }
 
         const valorIncTotal = itemCarrinho.precoUnitario * quantidade
         const ObjectIdProduto = ObjectId.createFromHexString ( produtoId )
         const carrinho = await db.collection < Carrinho > ( "carrinhos" ) .updateOne (
 
-            { usuarioId: usuarioId, "itens._id": produtoId },
+            { usuarioId:usuarioId, "itens._id":produtoId },
 
             { $set: {
 
-                    dataAtualizacao: new Date (),
-                    "itens.$.quantidade": quantidade
+                    dataAtualizacao:new Date (),
+                    "itens.$.quantidade":quantidade
 
                 },
 
                 $inc: {
 
-                    total: ( -quantidadeAntiga * itemCarrinho.precoUnitario ) + valorIncTotal 
+                    total: ( - quantidadeAntiga * itemCarrinho.precoUnitario ) + valorIncTotal 
 
                 },
 
@@ -260,7 +264,7 @@ class CarrinhoController {
 
         if ( carrinho.modifiedCount ) {
 
-            return res.status ( 200 ) .json ( { mensagem: "Quantidade Atualizada" } );
+            return res.status ( 200 ) .json ( { mensagem: "Quantidade atualizada" } );
 
         } else { 
 

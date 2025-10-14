@@ -6,6 +6,7 @@ import { NextFunction,Request,Response } from "express";
 import Auth from './middleware/auth.js';
 
 const app = express ();
+app.use(express.json())
 
 app.use(rotasNaoAutenticadas)
 app.use (Auth)

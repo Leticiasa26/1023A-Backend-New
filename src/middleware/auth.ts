@@ -1,15 +1,35 @@
-// Explicando o que é um Middleware
+// O que é um Middleware
 
-import { Request, Response, NextFunction } from "express"
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-function Auth ( req:Request, res:Response, next:NextFunction ) {
+interface RequestAuth extends Request {
 
-    console.log("passei no middleware")
-    
-    next ()
+    usuarioId?:string
 
+}
 
-    return res.status ( 401 ) .json ( { mensasgem: "Você não tem permissão para acessar este recurso" } )
+function Auth ( req:RequestAuth, res:Response, next:NextFunction ) {
+
+    const authHeader = req.headers.authorization    
+
+    if ( ! authHeader )
+
+       return res.status ( 401 ) .json ({mensagem: "Token não fornecido"})
+
+    const token = authHeader.split("")[1]!
+    jwt.verify ( token, process.env.JWT_SECRET!,(err,decoded)=>{
+        if (err){
+            console.log(err)
+            return res.status(401).json({ensagem:"Token inválido"})
+        }
+        if(typeof decoded === "string"||!decoded||!("usuarioId"in decoded))
+            return res.status(401).json ({mensagem: "Payload inválido"})
+
+        req.usuarioId = decoded.ususarioId;
+    })
+
+    //return res.status ( 401 ) .json ( { mensasgem: "Você não tem permissão para acessar este recurso" } )
 }
 
 export default Auth
