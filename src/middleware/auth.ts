@@ -15,21 +15,26 @@ function Auth ( req:RequestAuth, res:Response, next:NextFunction ) {
 
     if ( ! authHeader )
 
-       return res.status ( 401 ) .json ({mensagem: "Token não fornecido"})
+       return res.status ( 401 ) .json ( { mensagem: "Token não fornecido" } )
 
-    const token = authHeader.split("")[1]!
-    jwt.verify ( token, process.env.JWT_SECRET!,(err,decoded)=>{
-        if (err){
-            console.log(err)
-            return res.status(401).json({ensagem:"Token inválido"})
+    const token = authHeader.split ( "" ) [ 1 ] !
+
+    jwt.verify ( token, process.env.JWT_SECRET !, ( err,decoded ) => {
+
+        if ( err ) {
+
+            console.log ( err )
+
+            return res.status ( 401 ) .json ( { mensagem: "Token inválido" } )
+
         }
-        if(typeof decoded === "string"||!decoded||!("usuarioId"in decoded))
-            return res.status(401).json ({mensagem: "Payload inválido"})
+
+        if ( typeof decoded === "string" || ! decoded || ! ( "usuarioId" in decoded ) )
+
+            return res.status ( 401 ) .json ( { mensagem: "Payload inválido" } )
 
         req.usuarioId = decoded.ususarioId;
-    })
 
-    //return res.status ( 401 ) .json ( { mensasgem: "Você não tem permissão para acessar este recurso" } )
-}
+    } ) }
 
 export default Auth

@@ -268,7 +268,7 @@ class CarrinhoController {
 
         } else { 
 
-            return res.status ( 401 ) .json ( { mensagem: "Item ou carrinho não encontrado", erro: carrinho.modifiedCount } )
+            return res.status ( 401 ) .json ( { mensagem: "Item ou carrinho não encontrado", erro:carrinho.modifiedCount } )
 
         } } }
 

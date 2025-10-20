@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import mysql from 'mysql2/promise';
 
@@ -9,7 +9,7 @@ const app = express ();
 app.get ( '/', async ( req:Request, res:Response ) => {
 
     if ( ! process.env.DBHOST ) {
-        res.status ( 500 ) . send ( "Variável de ambiente DBHOST não está difinida" )
+        res.status ( 500 ) .send ( "Variável de ambiente DBHOST não está difinida" )
         return;
     }    
 
@@ -37,11 +37,11 @@ app.get ( '/', async ( req:Request, res:Response ) => {
 
     const connection =  await mysql.createConnection ( {
     
-        host: process.env.DBHOST,
-        user: process.env.DBUSER,
-        password: process.env.DBPASSWORD,
-        database: process.env.DBNAME,
-        port: Number ( process.env.DBPORT )
+        host:process.env.DBHOST,
+        user:process.env.DBUSER,
+        password:process.env.DBPASSWORD,
+        database:process.env.DBNAME,
+        port:Number ( process.env.DBPORT )
     
     } )
 
@@ -67,19 +67,17 @@ app.listen ( 8000, () => {
     
 });
 
-// Tarefa - Criar uma rota get para produtos que retorne a lista de produtos do Bando de Dados, o produto deve ter Id, Nome, Preço, URL Foto e Descrição. Deve - se criar uma tabela no Banco de Dados Aiven para armazenar os produtos e a resposta deve ser um array de produtos em formato JSON. 
-
 app.get ( '/produtos', async ( req:Request, res:Response ) => {
 
     try {
 
         const connection = await mysql.createConnection ( {
 
-            host: process.env.DBHOST ? process.env.DBHOST: 'error localhost',
-            user: process.env.DBUSER ? process.env.DBUSER: 'error user',
-            password: process.env.DBPASSWORD ? process.env.DBPASSWORD: '',
-            database: process.env.DBNAME ? process.env.DBNAME: "error name",
-            port: Number ( process.env.DBPORT ? process.env.DBPORT: "3306" )
+            host:process.env.DBHOST ? process.env.DBHOST: 'error localhost',
+            user:process.env.DBUSER ? process.env.DBUSER: 'error user',
+            password:process.env.DBPASSWORD ? process.env.DBPASSWORD: '',
+            database:process.env.DBNAME ? process.env.DBNAME: "error name",
+            port:Number ( process.env.DBPORT ? process.env.DBPORT: "3306" )
 
         });
 
@@ -91,6 +89,4 @@ app.get ( '/produtos', async ( req:Request, res:Response ) => {
 
         console.log ( "erro ao conectar", error )
         
-        }
-    
-});
+        } } );

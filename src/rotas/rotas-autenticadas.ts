@@ -12,7 +12,6 @@ rotasAutenticadas.get ( "/carrinho", carrinhoController.listarItens );
 rotasAutenticadas.delete ( "/carrinho", carrinhoController.deletarCarrinho );
 rotasAutenticadas.post ( "/produtos", produtoController.adicionar );
 rotasAutenticadas.get ( "/produtos", produtoController.listar );
-
 rotasAutenticadas.get ( "/usuarios", usuarioController.listar );
 rotasAutenticadas.post ( "/removerItensDoCarrinho", carrinhoController.removerItem );
 

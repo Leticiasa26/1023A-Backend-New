@@ -8,7 +8,7 @@ class ProdutoController {
         const produto = req.body
         const resultado = await db.collection ( 'produtos' ) .insertOne ( produto )
 
-        res.status ( 201 ) .json ( { ...produto, _id: resultado.insertedId } )
+        res.status ( 201 ) .json ( { ...produto, _id:resultado.insertedId } )
 
     }
 
