@@ -30,13 +30,20 @@ interface Produto {
 
 }
 
+interface RequestAuth extends Request {
+
+    usuarioId?:string
+
+}
+
 class CarrinhoController {
 
 // Adicionar item
 
-    async adicionar ( req:Request, res:Response ) {
+    async adicionar ( req:RequestAuth, res:Response ) {
 
-        const { produtoId, quantidade, usuarioId } = req.body as { usuarioId:string, produtoId:string, quantidade:number };
+        const { produtoId, quantidade } = req.body as { usuarioId:string, produtoId:string, quantidade:number };
+        const usuarioId = req.body
         console.log ( produtoId, quantidade, usuarioId )
 
 // Buscar o produto
